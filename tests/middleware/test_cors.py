@@ -201,8 +201,8 @@ def test_cors_allow_specific_origin(
 def test_cors_disallowed_preflight(
     test_client_factory: TestClientFactory,
 ) -> None:
-    def homepage(request: Request) -> None:
-        pass  # pragma: no cover
+    def homepage(request: Request) -> PlainTextResponse:
+        return PlainTextResponse("Homepage", status_code=200)  # pragma: no cover
 
     app = Starlette(
         routes=[Route("/", endpoint=homepage)],
@@ -251,8 +251,8 @@ def test_cors_disallowed_preflight(
 def test_cors_preflight_allow_all_methods(
     test_client_factory: TestClientFactory,
 ) -> None:
-    def homepage(request: Request) -> None:
-        pass  # pragma: no cover
+    def homepage(request: Request) -> PlainTextResponse:
+        return PlainTextResponse("Homepage", status_code=200)  # pragma: no cover
 
     app = Starlette(
         routes=[Route("/", endpoint=homepage)],
@@ -586,7 +586,8 @@ def test_cors_private_network_access_allowed(test_client_factory: TestClientFact
 
 
 def test_cors_private_network_access_disallowed(test_client_factory: TestClientFactory) -> None:
-    def homepage(request: Request) -> None: ...  # pragma: no cover
+    def homepage(request: Request) -> PlainTextResponse:
+        return PlainTextResponse("Homepage", status_code=200)  # pragma: no cover
 
     app = Starlette(
         routes=[Route("/", endpoint=homepage)],

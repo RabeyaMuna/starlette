@@ -35,6 +35,7 @@ def test_config_types() -> None:
         config("INT_CAST_DEFAULT_STR", cast=cast_to_int, default="true")
     with pytest.raises(ValueError):
         config("INT_DEFAULT_STR", cast=int, default="true")
+    return None
 
 
 def test_config(tmpdir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -100,6 +101,7 @@ def test_config(tmpdir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("BOOL_AS_INT", "2")
     with pytest.raises(ValueError):
         config.get("BOOL_AS_INT", cast=bool)
+    return None
 
 
 def test_missing_env_file_raises(tmpdir: Path) -> None:
@@ -107,6 +109,7 @@ def test_missing_env_file_raises(tmpdir: Path) -> None:
 
     with pytest.warns(UserWarning, match=f"Config file '{path}' not found."):
         Config(path)
+    return None
 
 
 def test_environ() -> None:
@@ -132,6 +135,7 @@ def test_environ() -> None:
     environ = Environ()
     assert list(iter(environ)) == list(iter(os.environ))
     assert len(environ) == len(os.environ)
+    return None
 
 
 def test_config_with_env_prefix(tmpdir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -140,6 +144,7 @@ def test_config_with_env_prefix(tmpdir: Path, monkeypatch: pytest.MonkeyPatch) -
 
     with pytest.raises(KeyError):
         config.get("ENVIRONMENT")
+    return None
 
 
 def test_config_with_encoding(tmpdir: Path) -> None:
@@ -147,3 +152,4 @@ def test_config_with_encoding(tmpdir: Path) -> None:
     path.write_text("MESSAGE=Hello 世界\n", encoding="utf-8")
     config = Config(path, encoding="utf-8")
     assert config.get("MESSAGE") == "Hello 世界"
+    return None
