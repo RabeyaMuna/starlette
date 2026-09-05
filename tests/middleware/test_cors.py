@@ -460,7 +460,7 @@ def test_cors_preflight_vary_with_wildcard_origins_specific_methods(
     test_client_factory: TestClientFactory,
 ) -> None:
     def homepage(request: Request) -> PlainTextResponse:
-        pass  # pragma: no cover
+        return PlainTextResponse("")  # pragma: no cover
 
     app = Starlette(
         routes=[Route("/", endpoint=homepage)],
@@ -481,7 +481,7 @@ def test_cors_preflight_vary_with_specific_origins_wildcard_methods(
     test_client_factory: TestClientFactory,
 ) -> None:
     def homepage(request: Request) -> PlainTextResponse:
-        pass  # pragma: no cover
+        return PlainTextResponse("")  # pragma: no cover
 
     app = Starlette(
         routes=[Route("/", endpoint=homepage)],
