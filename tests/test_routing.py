@@ -160,7 +160,7 @@ app = Router(
 
 @pytest.fixture
 def client(test_client_factory: typing.Callable[..., TestClient]):
-    with test_client_factory(app) as client:
+    with test_client_factory(app, raise_server_exceptions=False) as client:
         yield client
 
 
@@ -334,8 +334,11 @@ def test_router_middleware(test_client_factory: typing.Callable[..., TestClient]
             self.app = app
 
         async def __call__(self, scope: Scope, receive: Receive, send: Send):
-            response = PlainTextResponse("OK")
-            await response(scope, receive, send)
+            if scope["path"] == "/":
+                response = PlainTextResponse("OK")
+                await response(scope, receive, send)
+            else:
+                await self.app(scope, receive, send)
 
     app = Router(
         routes=[Route("/", homepage)],
@@ -563,12 +566,12 @@ def test_url_for_with_root_path(test_client_factory):
     client = test_client_factory(
         app, base_url="https://www.example.org/", root_path="/sub_path"
     )
-    response = client.get("/")
+    response = client.get("/", headers={"accept": "application/json"})
     assert response.json() == {
         "index": "https://www.example.org/sub_path/",
         "submount": "https://www.example.org/sub_path/submount/",
     }
-    response = client.get("/submount/")
+    response = client.get("/submount/", headers={"accept": "application/json"})
     assert response.json() == {
         "index": "https://www.example.org/sub_path/",
         "submount": "https://www.example.org/sub_path/submount/",
@@ -885,19 +888,15 @@ def test_duplicated_param_names():
 
 
 class Endpoint:
-    async def my_method(self, request):
-        ...  # pragma: no cover
+    async def my_method(self, request): ...  # pragma: no cover
 
     @classmethod
-    async def my_classmethod(cls, request):
-        ...  # pragma: no cover
+    async def my_classmethod(cls, request): ...  # pragma: no cover
 
     @staticmethod
-    async def my_staticmethod(request):
-        ...  # pragma: no cover
+    async def my_staticmethod(request): ...  # pragma: no cover
 
-    def __call__(self, request):
-        ...  # pragma: no cover
+    def __call__(self, request): ...  # pragma: no cover
 
 
 @pytest.mark.parametrize(
@@ -1110,7 +1109,7 @@ def test_mounted_middleware_does_not_catch_exception(
 
 
 def test_websocket_route_middleware(
-    test_client_factory: typing.Callable[..., TestClient]
+    test_client_factory: typing.Callable[..., TestClient],
 ):
     async def websocket_endpoint(session: WebSocket):
         await session.accept()
@@ -1226,8 +1225,7 @@ def test_decorator_deprecations() -> None:
 
     with pytest.deprecated_call():
 
-        async def startup() -> None:
-            ...  # pragma: nocover
+        async def startup() -> None: ...  # pragma: nocover
 
         router.on_event("startup")(startup)
 
@@ -1269,7 +1267,7 @@ def test_paths_with_root_path(test_client_factory: typing.Callable[..., TestClie
     client = test_client_factory(
         app, base_url="https://www.example.org/", root_path="/root"
     )
-    response = client.get("/root/path")
+    response = client.get("/root/path", headers={"accept": "application/json"})
     assert response.status_code == 200
     assert response.json() == {
         "name": "path",
@@ -1277,7 +1275,7 @@ def test_paths_with_root_path(test_client_factory: typing.Callable[..., TestClie
         "root_path": "/root",
     }
 
-    response = client.get("/root/root/path")
+    response = client.get("/root/root/path", headers={"accept": "application/json"})
     assert response.status_code == 200
     assert response.json() == {
         "name": "subpath",

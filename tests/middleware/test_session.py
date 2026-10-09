@@ -169,6 +169,7 @@ def test_session_cookie(test_client_factory):
     client: TestClient = test_client_factory(app)
 
     response = client.post("/update_session", json={"some": "data"})
+    assert response.status_code == 200
     assert response.json() == {"session": {"some": "data"}}
 
     # check cookie max-age
@@ -177,6 +178,7 @@ def test_session_cookie(test_client_factory):
 
     client.cookies.delete("session")
     response = client.get("/view_session")
+    assert response.status_code == 200
     assert response.json() == {"session": {}}
 
 
@@ -193,6 +195,7 @@ def test_domain_cookie(test_client_factory):
     client: TestClient = test_client_factory(app)
 
     response = client.post("/update_session", json={"some": "data"})
+    assert response.status_code == 200
     assert response.json() == {"session": {"some": "data"}}
 
     # check cookie max-age
@@ -201,4 +204,5 @@ def test_domain_cookie(test_client_factory):
 
     client.cookies.delete("session")
     response = client.get("/view_session")
+    assert response.status_code == 200
     assert response.json() == {"session": {}}
