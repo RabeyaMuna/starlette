@@ -55,7 +55,9 @@ def iscoroutinefunction_or_partial(obj: typing.Any) -> bool:  # pragma: no cover
 
 
 def request_response(
-    func: typing.Callable[[Request], typing.Union[typing.Awaitable[Response], Response]]
+    func: typing.Callable[
+        [Request], typing.Union[typing.Awaitable[Response], Response]
+    ],
 ) -> ASGIApp:
     """
     Takes a function or coroutine `func(request) -> response`,
@@ -78,7 +80,7 @@ def request_response(
 
 
 def websocket_session(
-    func: typing.Callable[[WebSocket], typing.Awaitable[None]]
+    func: typing.Callable[[WebSocket], typing.Awaitable[None]],
 ) -> ASGIApp:
     """
     Takes a coroutine `func(session)`, and returns an ASGI application.
@@ -254,7 +256,9 @@ class Route(BaseRoute):
         path_params: "typing.Dict[str, typing.Any]"
         if scope["type"] == "http":
             root_path = scope.get("route_root_path", scope.get("root_path", ""))
-            path = scope.get("route_path", re.sub(r"^" + root_path, "", scope["path"]))
+            path = scope.get("route_path", scope["path"])
+            if not scope.get("route_path"):
+                path = re.sub(r"^" + root_path, "", path)
             match = self.path_regex.match(path)
             if match:
                 matched_params = match.groupdict()
@@ -344,7 +348,9 @@ class WebSocketRoute(BaseRoute):
         path_params: "typing.Dict[str, typing.Any]"
         if scope["type"] == "websocket":
             root_path = scope.get("route_root_path", scope.get("root_path", ""))
-            path = scope.get("route_path", re.sub(r"^" + root_path, "", scope["path"]))
+            path = scope.get("route_path", scope["path"])
+            if not scope.get("route_path"):
+                path = re.sub(r"^" + root_path, "", path)
             match = self.path_regex.match(path)
             if match:
                 matched_params = match.groupdict()
@@ -420,7 +426,9 @@ class Mount(BaseRoute):
         if scope["type"] in ("http", "websocket"):
             path = scope["path"]
             root_path = scope.get("route_root_path", scope.get("root_path", ""))
-            route_path = scope.get("route_path", re.sub(r"^" + root_path, "", path))
+            route_path = scope.get("route_path", path)
+            if not scope.get("route_path"):
+                route_path = re.sub(r"^" + root_path, "", path)
             mount_match = self.path_regex.match(route_path)
             path_match = self.routes == [] or any(
                 [route.matches(scope)[0] == Match.FULL for route in self.routes]
